@@ -6,15 +6,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/aspect-build/bazel-lib/tools/common"
 )
 
 type pathSet map[string]bool
 
+const maxConcureancy = 9000
+
 var srcPaths = pathSet{}
-var copyWaitGroup sync.WaitGroup
+var copyWaitGroup = common.NewWaitingGroup(maxConcureancy)
 var hardlink = false
 var verbose = false
 
@@ -63,14 +64,14 @@ func copyDir(src string, dst string) error {
 			} else {
 				// symlink points to a regular file
 				copyWaitGroup.Add(1)
-				go common.Copy(linkPath, d, stat, hardlink, verbose, &copyWaitGroup)
+				go common.Copy(linkPath, d, stat, hardlink, verbose, copyWaitGroup)
 				return nil
 			}
 		}
 
 		// a regular file
 		copyWaitGroup.Add(1)
-		go common.Copy(p, d, info, hardlink, verbose, &copyWaitGroup)
+		go common.Copy(p, d, info, hardlink, verbose, copyWaitGroup)
 		return nil
 	})
 }

@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"sync"
 )
 
 // From https://opensource.com/article/18/6/copying-files-go
@@ -26,7 +25,7 @@ func CopyFile(src string, dst string) error {
 	return err
 }
 
-func Copy(src string, dst string, info fs.FileInfo, link bool, verbose bool, wg *sync.WaitGroup) {
+func Copy(src string, dst string, info fs.FileInfo, link bool, verbose bool, wg WaitGroup) {
 	if wg != nil {
 		defer wg.Done()
 	}
